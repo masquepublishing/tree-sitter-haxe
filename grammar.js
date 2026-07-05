@@ -25,6 +25,7 @@ const haxe_grammar = {
     [$.type, $._function_type_args],
     [$.structure_type_pair, $._function_type_args],
     [$.function_declaration, $.variable_declaration],
+    [$.function_expression, $.function_declaration],
     [$._prefixUnaryOperator, $._arithmeticOperator],
     [$._prefixUnaryOperator, $._postfixUnaryOperator],
     [$._rhs_expression, $._lhs_expression],
@@ -199,6 +200,29 @@ const haxe_grammar = {
 
     type_trace_expression: ($) => seq('$type', '(', $._rhs_expression, ')'),
 
+    // Anonymous function literal used in expression position (callback
+    // arguments, variable-declaration RHS, etc.) -- `doThing(function(x) {
+    // ... })`. There was previously no way to write a function as an
+    // expression at all: $.function_declaration is a statement-level
+    // $.declaration that always ends in $._lookback_semicolon, which isn't
+    // present (and shouldn't be consumed) when a function literal is nested
+    // inside a call's argument list or ends right at ')'. Real-world code
+    // uses this constantly (373 files in this depot pass an anonymous
+    // function as a callback argument). Deliberately excludes
+    // $._modifier/type_params (not valid on an anonymous function) and the
+    // trailing semicolon (the function's block is the end of the
+    // expression, whatever follows -- ')', ',', ';' -- belongs to the
+    // enclosing construct, not this rule).
+    function_expression: ($) =>
+      seq(
+        repeat($.metadata),
+        'function',
+        optional(field('name', $._lhs_expression)),
+        $._function_arg_list,
+        optional(seq(':', field('return_type', $.type))),
+        field('body', $.block),
+      ),
+
     _parenthesized_expression: ($) => seq('(', repeat1(prec.left($.expression)), ')'),
 
     range_expression: ($) =>
@@ -268,6 +292,7 @@ const haxe_grammar = {
         $._parenthesized_expression,
         $.switch_expression,
         $.ternary_expression,
+        $.function_expression,
         // simple expression, or chained.
         seq($._rhs_expression, repeat(seq($.operator, $._chain_term))),
         // Same chain, but with a leading prefix-unary term (`!x && y`,
@@ -285,8 +310,77 @@ const haxe_grammar = {
           $._rhs_expression,
           repeat1(seq($.operator, $._chain_term)),
         ),
-        seq('return', optional($._rhs_expression)),
-        seq('untyped', $._rhs_expression),
+        // $.subscript_expression as a chain HEAD -- `x[i] = y;`,
+        // `x[i] * y`, etc. $.subscript_expression was only ever a complete,
+        // standalone `expression` on its own (e.g. `x[i];` alone), never
+        // one term of a longer chain, so any assignment or arithmetic
+        // involving an array/map element on the left failed outright.
+        // Extremely common (found via the same depot-wide sweep as the
+        // `return`/`untyped` fix above -- e.g. `mPieces[idx] = null;`,
+        // `sPeerMap[arg] = sharedName;`, `kBonusWinCredits[i] * mult`).
+        // repeat1-gated for the same reason as the leading-unary
+        // alternative above: a solo `x[i]` alone must still go through
+        // the plain $.subscript_expression choice, not this one.
+        seq($.subscript_expression, repeat1(seq($.operator, $._chain_term))),
+        // A postfix-unary term (`i--`, `i++`) as a chain HEAD -- `i-- > 0`,
+        // common in `while (i-- > 0)` loops. The leading-unary alternative
+        // above only covers a PREFIX unary head (`!x && y`); postfix was
+        // still only reachable as the entire standalone $._unaryExpression,
+        // never chained with a further operator. Same repeat1 gating and
+        // same rationale as the leading-unary alternative.
+        seq(
+          $._rhs_expression,
+          alias($._postfixUnaryOperator, $.operator),
+          repeat1(seq($.operator, $._chain_term)),
+        ),
+        // `return`/`untyped` previously only took a single bare
+        // $._rhs_expression, not a chain -- so `return a == b;` or
+        // `return a = b;` (assign-and-return, common in this depot's
+        // property setters, e.g. `return mKenoCardModel = kenoCardModel;`)
+        // had no valid derivation covering the whole span, and would
+        // hard-error. This was actually a PRE-EXISTING gap masked by a
+        // separate bug: before the _unaryExpression operator-set fix
+        // elsewhere in this fork's history, `a ==`/`a =` could silently
+        // (and incorrectly) match as _unaryExpression's postfix form
+        // (generic $.operator misread as a bogus postfix unary op),
+        // giving `return` an _rhs_expression-shaped path to latch onto by
+        // accident. Fixing that bug correctly closed off the accidental
+        // path here too, surfacing this as a hard ERROR instead of a
+        // silent misparse -- found via a depot-wide sweep after combining
+        // this fork's fixes, not caught by any single fix's own testing.
+        // Broadened to accept the same chain shapes -- plain and
+        // leading-unary -- that a bare (non-`return`) expression already
+        // supports.
+        seq(
+          'return',
+          optional(
+            choice(
+              seq($._rhs_expression, repeat(seq($.operator, $._chain_term))),
+              seq(
+                alias($._prefixUnaryOperator, $.operator),
+                $._rhs_expression,
+                repeat(seq($.operator, $._chain_term)),
+              ),
+              // Bare subscript return value (`return arr[i];`), not just a
+              // chained one -- $.subscript_expression isn't part of
+              // $._rhs_expression, so without this a bare `return arr[i];`
+              // with nothing following the ']' had no derivation at all.
+              $.subscript_expression,
+            ),
+          ),
+        ),
+        seq(
+          'untyped',
+          choice(
+            seq($._rhs_expression, repeat(seq($.operator, $._chain_term))),
+            $.subscript_expression,
+            seq(
+              alias($._prefixUnaryOperator, $.operator),
+              $._rhs_expression,
+              repeat(seq($.operator, $._chain_term)),
+            ),
+          ),
+        ),
         'break',
         'continue',
       ),
