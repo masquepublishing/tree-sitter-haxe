@@ -6,9 +6,6 @@ const builtins = require('./grammar-builtins');
 
 const { commaSep, commaSep1 } = require('./utils');
 
-const preprocessor_statement_start_tokens = ['if', 'elseif'];
-const preprocessor_statement_end_tokens = ['else', 'end'];
-
 const haxe_grammar = {
   name: 'haxe',
   externals: ($) => [$._lookback_semicolon, $._closing_brace_marker, $._closing_brace_unmarker],
@@ -36,6 +33,11 @@ const haxe_grammar = {
     [$._ternary_condition, $.pair],
     [$._unaryExpression, $._ternary_condition, $.pair],
     [$._chain_term, $._ternary_condition],
+    [$.enum_abstract_declaration, $.enum_declaration],
+    [$.typedef_declaration, $.structure_type],
+    [$.member_expression, $._lhs_expression],
+    [$.preprocessor_statement],
+    [$._rhs_expression, $.member_expression],
   ],
   rules: {
     module: ($) => seq(repeat($.statement)),
@@ -61,14 +63,37 @@ const haxe_grammar = {
         ),
       ),
 
+    // `#if`/`#elseif`/`#else`/`#end` previously matched as separate,
+    // unrelated $.statement siblings, with no structural link to the
+    // declarations/statements they're actually guarding -- `#if (sys ||
+    // nodejs)` and the `function benchmark() {...}` right after it came out
+    // as two disconnected nodes in a flat list, silently discarding the
+    // conditional-compilation relationship (no ERROR node; this is a
+    // "wrong tree, not a broken one" bug, github.com/vantreeseba/tree-sitter-haxe/issues/36).
+    // Extremely common in this depot: 534 files use `#if`/`#elseif`
+    // immediately guarding a declaration-shaped line (var/function/public/etc).
+    // Restructured to nest each branch's guarded statements as children of
+    // one preprocessor_statement node, the same "each branch owns its own
+    // condition and body" shape used for conditional_statement's
+    // (`if`/`else if`/`else`) fix earlier in this fork's history. This does
+    // NOT evaluate which branch is "active" -- all branches stay in the
+    // tree, since a single source file compiles to multiple targets
+    // (html5, flash, cpp, ...) and every variant needs to stay visible to
+    // tooling built on this grammar, not just whichever one a particular
+    // build's defines would keep.
     preprocessor_statement: ($) =>
       prec.right(
         seq(
           '#',
-          choice(
-            seq(token.immediate(choice(...preprocessor_statement_start_tokens)), $.expression),
-            token.immediate(choice(...preprocessor_statement_end_tokens)),
+          token.immediate('if'),
+          field('condition', $.expression),
+          repeat($.statement),
+          repeat(
+            seq('#', token.immediate('elseif'), field('condition', $.expression), repeat($.statement)),
           ),
+          optional(seq('#', token.immediate('else'), repeat($.statement))),
+          '#',
+          token.immediate('end'),
         ),
       ),
 
@@ -278,20 +303,23 @@ const haxe_grammar = {
         //           seq($._parenthesized_expression, '[', field('index', $.expression), ']'),
       ),
 
+    // Left-associative (issue #52: `a.b.c` parses as `(a.b).c`, not
+    // `a.(b.c)`) via recursion on the object side -- $.member_expression is
+    // itself a valid `object`, and `member` is a single non-recursive
+    // $.identifier, matching main's fix for #52. The '?.' tokenization
+    // stays atomic (one token, no space allowed) rather than '?' and '.'
+    // as two separate tokens: with them separate, `identifier '?'` is
+    // ambiguous between "start of safe-nav" and "start of a
+    // ternary_expression" -- resolving that needs to see whether '.'
+    // follows, i.e. 2 tokens of lookahead, more than LALR(1) has. Making
+    // '?.' atomic pushes that decision into the lexer instead of the parser
+    // -- needed for ternary support, which predates #52's fix landing here.
     member_expression: ($) =>
-      prec.right(
+      prec.left(1,
         seq(
-          choice(field('object', choice('this', $.identifier)), field('literal', $._literal)),
-          // '?.' must be one atomic token (no space allowed, matching real
-          // Haxe syntax) rather than '?' and '.' as separate tokens. With
-          // them separate, `identifier '?'` is ambiguous between "start of
-          // safe-nav" and "start of a ternary_expression" -- resolving that
-          // needs to see whether '.' follows, i.e. 2 tokens of lookahead,
-          // more than LALR(1) has. Making '?.' atomic pushes the decision
-          // into the lexer (does the next char after '?' happen to be '.'?)
-          // instead of the parser.
+          field('object', choice('this', $.identifier, $.member_expression, $._literal)),
           choice(token('.'), alias(token(seq('?', '.')), $.operator)),
-          repeat1(field('member', $._lhs_expression)),
+          field('member', $.identifier),
         ),
       ),
 
@@ -396,7 +424,7 @@ const haxe_grammar = {
 
     comment: ($) => token(choice(seq('//', /.*/), seq('/*', /[^*]*\*+([^/*][^*]*\*+)*/, '/'))),
     // TODO: implement the structures that use these
-    keyword: ($) => choice('catch', 'do', 'enum', 'for', 'try', 'while'),
+    keyword: ($) => choice('catch', 'do', 'for', 'try', 'while'),
     // keywords reserved by the haxe compiler that are not currently used
     reserved_keyword: ($) => choice('operator'),
     identifier: ($) => /[a-zA-Z_]+[a-zA-Z0-9]*/,
