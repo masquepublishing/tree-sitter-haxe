@@ -463,6 +463,38 @@ Array literal with multiple elements
 )
 
 ===================
+Array literal with trailing comma
+===================
+
+  var y = [1, 2, 3,];
+
+---
+
+(module
+  (variable_declaration
+    (identifier)
+    (operator)
+    (array (integer) (integer) (integer))
+  )
+)
+
+===================
+Array literal with single element and trailing comma
+===================
+
+  var y = [1,];
+
+---
+
+(module
+  (variable_declaration
+    (identifier)
+    (operator)
+    (array (integer))
+  )
+)
+
+===================
 Array literal with object element
 ===================
 
