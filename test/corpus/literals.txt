@@ -21,7 +21,7 @@ class main {
 )
 
 ===================
-int literal with seperators.
+int literal with separators.
 ===================
 
 class main {
@@ -67,7 +67,7 @@ class main {
 )
 
 ===================
-int hex literal with seperators.
+int hex literal with separators.
 ===================
 
 class main {
@@ -112,7 +112,7 @@ class main {
 )
 
 ===================
-float literal with seperators.
+float literal with separators.
 ===================
 
 class main {
@@ -159,7 +159,7 @@ class main {
 )
 
 ===================
-float literal e notation with seperators.
+float literal e notation with separators.
 ===================
 
 class main {
