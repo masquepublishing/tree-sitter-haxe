@@ -115,8 +115,14 @@ const haxe_grammar = {
 
     throw_statement: ($) => prec.right(seq('throw', $.expression, $._lookback_semicolon)),
 
+    // 'this' is added directly here (not just reachable via member_expression's
+    // object field) so bare `this` works as a standalone expression -- return
+    // value, assignment RHS, call argument, etc. -- not just as the head of a
+    // member-access chain (`this.foo`). Pre-existing gap, unrelated to the two
+    // fixes above; found by testing against real code in this depot, where
+    // bare `this` is common (589 files).
     _rhs_expression: ($) =>
-      prec(1, choice($._literal, $.identifier, $.member_expression, $.call_expression)),
+      prec(1, choice($._literal, $.identifier, 'this', $.member_expression, $.call_expression)),
 
     // Restricted to the actual unary operator sets (_prefixUnaryOperator/
     // _postfixUnaryOperator), not the fully generic $.operator (which also
@@ -451,7 +457,11 @@ const haxe_grammar = {
     // $.statement already covers both shapes (`{ ... }` via its own
     // $.block alternative, or a bare `expr;` via its
     // `seq($.expression, $._lookback_semicolon)` alternative), so reusing
-    // it gets braceless bodies "for free" without a separate rule.
+    // it gets braceless bodies "for free" without a separate rule. Also
+    // covers the earlier 'else if' fix (each branch gets its own
+    // condition/body via repeat(...), reusing the same 'arguments_list'
+    // field name across branches) as a strict subset -- this version adds
+    // braceless bodies on top of that.
     conditional_statement: ($) =>
       prec.right(
         1,

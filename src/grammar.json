@@ -483,6 +483,10 @@
             "name": "identifier"
           },
           {
+            "type": "STRING",
+            "value": "this"
+          },
+          {
             "type": "SYMBOL",
             "name": "member_expression"
           },
@@ -3406,6 +3410,18 @@
       "content": {
         "type": "SEQ",
         "members": [
+          {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "STRING",
+                "value": "?"
+              },
+              {
+                "type": "BLANK"
+              }
+            ]
+          },
           {
             "type": "FIELD",
             "name": "name",
