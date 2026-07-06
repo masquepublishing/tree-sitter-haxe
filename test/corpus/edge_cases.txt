@@ -46,3 +46,57 @@ function stuff(y:Array<String> = null) {
     )
   )
 )
+
+===================
+KNOWN LIMITATION (cb9e773 / upstream PR #70): compound-assignment statement
+after a brace-closed block, inside a bare statement list (module top level
+or a preprocessor_statement body -- NOT inside a $.block, which is
+unaffected). Minimal repro. See haxe/src/com/masque/net/OfflineConnection.hx
+in the Masque depot for the real-world case this was found from.
+:error
+===================
+
+{ x += 1; }
+y += 2;
+
+---
+
+(module
+  (block (identifier) (operator) (integer))
+  (identifier)
+  (MISSING identifier)
+  (operator)
+  (integer)
+)
+
+===================
+KNOWN LIMITATION (cb9e773 / upstream PR #70): same defect, shaped like the
+real-world trigger -- a `while` loop guarded by `#if`/`#end`, immediately
+followed by a sibling compound-assignment statement.
+:error
+===================
+
+#if flash
+while (a > 0) {
+    b += 1;
+}
+c += 2;
+#end
+
+---
+
+(module
+  (preprocessor_statement
+    condition: (identifier)
+    (while_statement
+      condition: (identifier)
+      condition: (operator)
+      condition: (integer)
+      body: (block (identifier) (operator) (integer))
+    )
+    (identifier)
+    (MISSING identifier)
+    (operator)
+    (integer)
+  )
+)
