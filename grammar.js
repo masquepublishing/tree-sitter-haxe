@@ -30,15 +30,15 @@ const haxe_grammar = {
     [$.function_declaration, $.variable_declaration],
     [$._prefixUnaryOperator, $._arithmeticOperator],
     [$._prefixUnaryOperator, $._postfixUnaryOperator],
+    [$.enum_abstract_declaration, $.enum_declaration],
+    [$.typedef_declaration, $.structure_type],
+    [$.member_expression, $._lhs_expression],
     [$._rhs_expression, $._lhs_expression],
     [$._rhs_expression, $.subscript_expression],
     [$._lhs_expression, $.pair],
     [$._ternary_condition, $.pair],
     [$._unaryExpression, $._ternary_condition, $.pair],
     [$._chain_term, $._ternary_condition],
-    [$.enum_abstract_declaration, $.enum_declaration],
-    [$.typedef_declaration, $.structure_type],
-    [$.member_expression, $._lhs_expression],
     [$._rhs_expression, $.member_expression],
     [$.conditional_statement],
   ],
@@ -366,14 +366,13 @@ const haxe_grammar = {
     // Left-associative (issue #52: `a.b.c` parses as `(a.b).c`, not
     // `a.(b.c)`) via recursion on the object side -- $.member_expression is
     // itself a valid `object`, and `member` is a single non-recursive
-    // $.identifier. The '?.' tokenization stays atomic (one token, no space
-    // allowed) rather than '?' and '.' as two separate tokens: with them
-    // separate, `identifier '?'` is ambiguous between "start of safe-nav"
-    // and "start of a ternary_expression" -- resolving that needs to see
-    // whether '.' follows, i.e. 2 tokens of lookahead, more than LALR(1)
-    // has. Making '?.' atomic pushes that decision into the lexer instead
-    // of the parser -- needed for ternary support, which predates #52's
-    // fix landing here.
+    // $.identifier. The '?.' tokenization stays atomic (one token, no
+    // space allowed) rather than '?' and '.' as two separate tokens: with
+    // them separate, `identifier '?'` is ambiguous between "start of
+    // safe-nav" and "start of a ternary_expression" -- resolving that
+    // needs to see whether '.' follows, i.e. 2 tokens of lookahead, more
+    // than LALR(1) has. Making '?.' atomic pushes that decision into the
+    // lexer instead of the parser -- needed for ternary support.
     member_expression: ($) =>
       prec.left(1,
         seq(
@@ -602,8 +601,8 @@ const haxe_grammar = {
     reserved_keyword: ($) => choice('operator'),
     identifier: ($) => /[a-zA-Z_]+[a-zA-Z0-9]*/,
     // Hidden Nodes in tree.
-    _camelCaseIdentifier: ($) => /[a-z_]+[a-zA-Z0-9]*/,
-    _pascalCaseIdentifier: ($) => /[A-Z]+[a-zA-Z0-9]*/,
+    _camelCaseIdentifier: ($) => /[a-z_]+[a-zA-Z0-9_]*/,
+    _pascalCaseIdentifier: ($) => /[A-Z_]+[a-zA-Z0-9_]*/,
     _semicolon: ($) => $._lookback_semicolon,
   },
 };
