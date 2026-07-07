@@ -6,7 +6,10 @@ interface Main {}
 
 ---
 
-(module (interface_declaration (identifier) (block)))
+(module
+  (interface_declaration
+    (identifier)
+    (block)))
 
 ===================
 interface with function
@@ -24,11 +27,8 @@ interface Printable {
     (block
       (function_declaration
         (identifier)
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))))))
 
 ===================
 interface with type params
@@ -42,12 +42,11 @@ interface Main<T,U> {}
   (interface_declaration
     (identifier)
     (type_params
-      (type (identifier))
-      (type (identifier))
-    )
-    (block)
-  )
-)
+      (type
+        (identifier))
+      (type
+        (identifier)))
+    (block)))
 
 ===================
 interface with nested type params
@@ -61,19 +60,16 @@ interface Main<T, Other<U, V>> {}
   (interface_declaration
     (identifier)
     (type_params
-      (type (identifier))
+      (type
+        (identifier))
       (type
         (identifier)
         (type_params
-          (type (identifier))
-          (type (identifier))
-        )
-      )
-    )
-    (block)
-  )
-)
-
+          (type
+            (identifier))
+          (type
+            (identifier)))))
+    (block)))
 
 ===================
 interface extending another
@@ -83,12 +79,11 @@ interface ITest extends IBanana {}
 
 ---
 
-(module (interface_declaration
-  (identifier)
-  (type_name)
-  (block)
-))
-
+(module
+  (interface_declaration
+    (identifier)
+    (type_name)
+    (block)))
 
 ===================
 interface extending another from a package
@@ -98,13 +93,12 @@ interface ITest extends fruitbowl.IBanana {}
 
 ---
 
-(module (interface_declaration
-  (identifier)
-  (package_name)
-  (type_name)
-  (block)
-))
-
+(module
+  (interface_declaration
+    (identifier)
+    (package_name)
+    (type_name)
+    (block)))
 
 ===================
 interface with modifiers
@@ -114,8 +108,10 @@ private extern final interface ITest {}
 
 ---
 
-(module (interface_declaration (identifier) (block)))
-
+(module
+  (interface_declaration
+    (identifier)
+    (block)))
 
 ===================
 class implementing interface
@@ -125,7 +121,11 @@ class Main implements ITest {}
 
 ---
 
-(module (class_declaration (identifier) (type_name) (block)))
+(module
+  (class_declaration
+    (identifier)
+    (type_name)
+    (block)))
 
 ===================
 class implementing multiple interfaces
@@ -135,12 +135,12 @@ class Main implements ITest implements IAnother {}
 
 ---
 
-(module (class_declaration
-  (identifier)
-  (type_name)
-  (type_name)
-  (block)
-))
+(module
+  (class_declaration
+    (identifier)
+    (type_name)
+    (type_name)
+    (block)))
 
 ===================
 class extending parent class in package
@@ -150,13 +150,12 @@ class Main extends pack.Test {}
 
 ---
 
-(module (class_declaration
-  (identifier)
-  (package_name)
-  (type_name)
-  (block)
-))
-
+(module
+  (class_declaration
+    (identifier)
+    (package_name)
+    (type_name)
+    (block)))
 
 ===================
 final class
@@ -166,9 +165,10 @@ final class Main {}
 
 ---
 
-(module (class_declaration (identifier) (block)))
-
-
+(module
+  (class_declaration
+    (identifier)
+    (block)))
 
 ===================
 class with modifiers
@@ -178,8 +178,10 @@ private extern final class Main {}
 
 ---
 
-(module (class_declaration (identifier) (block)))
-
+(module
+  (class_declaration
+    (identifier)
+    (block)))
 
 ===================
 class
@@ -189,7 +191,10 @@ class Main {}
 
 ---
 
-(module (class_declaration (identifier) (block)))
+(module
+  (class_declaration
+    (identifier)
+    (block)))
 
 ===================
 class with type params
@@ -203,13 +208,11 @@ class Main<T,U> {}
   (class_declaration
     (identifier)
     (type_params
-      (type (identifier))
-      (type (identifier))
-    )
-    (block)
-  )
-)
-
+      (type
+        (identifier))
+      (type
+        (identifier)))
+    (block)))
 
 ===================
 class constructor
@@ -222,13 +225,11 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
-      (function_declaration (block))
-    )
-  )
-)
-
+      (function_declaration
+        (block)))))
 
 ===================
 class function
@@ -241,12 +242,12 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
-      (function_declaration (identifier) (block))
-    )
-  )
-)
+      (function_declaration
+        (identifier)
+        (block)))))
 
 ===================
 class function with type params
@@ -259,19 +260,17 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (function_declaration
         (identifier)
         (type_params
-          (type (identifier))
-          (type (identifier))
-        )
-        (block))
-    )
-  )
-)
-
+          (type
+            (identifier))
+          (type
+            (identifier)))
+        (block)))))
 
 ===================
 class function with arg
@@ -284,15 +283,14 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
-      (function_declaration (identifier)
-        (function_arg (identifier))
-        (block)
-      )
-    )
-  )
-)
+      (function_declaration
+        (identifier)
+        (function_arg
+          (identifier))
+        (block)))))
 
 ===================
 class function with arg, types and default param.
@@ -305,16 +303,21 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
-      (function_declaration (identifier)
-        (function_arg (identifier) (type (identifier)) (integer))
-        (function_arg (identifier) (type (identifier)))
-        (block)
-      )
-    )
-  )
-)
+      (function_declaration
+        (identifier)
+        (function_arg
+          (identifier)
+          (type
+            (identifier))
+          (integer))
+        (function_arg
+          (identifier)
+          (type
+            (identifier)))
+        (block)))))
 
 ===================
 class with property and read/write access
@@ -327,15 +330,14 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
-      (variable_declaration (identifier)
-        (access_identifiers )
-        (type (identifier))
-      )
-    )
-  )
-)
+      (variable_declaration
+        (identifier)
+        (access_identifiers)
+        (type
+          (identifier))))))
 
 ===================
 function with generic typed arg
@@ -352,12 +354,10 @@ function foo(x:Array<Int>){}
       (identifier)
       (type
         (identifier)
-        (type_params (type (identifier)))
-      )
-    )
-    (block)
-  )
-)
+        (type_params
+          (type
+            (identifier)))))
+    (block)))
 
 ===================
 function with anonymous struct arg
@@ -373,14 +373,15 @@ function foo(x:{z:int, y:float}){}
     (function_arg
       (identifier)
       (type
-        (pair (identifier) (type (identifier)))
-        (pair (identifier) (type (identifier)))
-      )
-    )
-    (block)
-  )
-)
-
+        (pair
+          (identifier)
+          (type
+            (identifier)))
+        (pair
+          (identifier)
+          (type
+            (identifier)))))
+    (block)))
 
 ===================
 class with runtime metadata
@@ -394,11 +395,10 @@ class Main {
 
 (module
   (class_declaration
-    (metadata (identifier))
+    (metadata
+      (identifier))
     (identifier)
-    (block)
-  )
-)
+    (block)))
 
 ===================
 class with compile time metadata
@@ -412,12 +412,10 @@ class Main {
 
 (module
   (class_declaration
-    (metadata (identifier))
+    (metadata
+      (identifier))
     (identifier)
-    (block)
-  )
-)
-
+    (block)))
 
 ===================
 class function with runtime metadata
@@ -431,16 +429,14 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (function_declaration
-        (metadata (identifier))
+        (metadata
+          (identifier))
         (identifier)
-        (block)
-      )
-    )
-  )
-)
+        (block)))))
 
 ===================
 class function with compile time metadata
@@ -454,16 +450,14 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (function_declaration
-        (metadata (identifier))
+        (metadata
+          (identifier))
         (identifier)
-        (block)
-      )
-    )
-  )
-)
+        (block)))))
 
 ===================
 class variable with runtime metadata
@@ -477,16 +471,15 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (variable_declaration
-        (metadata (identifier))
+        (metadata
+          (identifier))
         (identifier)
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))))))
 
 ===================
 class variable with compile time metadata
@@ -500,16 +493,15 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (variable_declaration
-        (metadata (identifier))
+        (metadata
+          (identifier))
         (identifier)
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))))))
 
 ===================
 class public static inline function
@@ -520,14 +512,14 @@ class Main {
 }
 
 ---
+
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (function_declaration
-      (identifier) (block))
-    )
-  )
-)
+        (identifier)
+        (block)))))
 
 ===================
 class function with declaration assignment statement
@@ -543,17 +535,20 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
-      (function_declaration (identifier)
+      (function_declaration
+        (identifier)
         (block
-          (variable_declaration (identifier) (operator) (integer))
-          (variable_declaration (identifier) (operator) (string))
-        )
-      )
-    )
-  )
-)
+          (variable_declaration
+            (identifier)
+            (operator)
+            (integer))
+          (variable_declaration
+            (identifier)
+            (operator)
+            (string)))))))
 
 ===================
 class function with separate declaration and assignment statements
@@ -572,19 +567,22 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
-      (function_declaration (identifier)
+      (function_declaration
+        (identifier)
         (block
-          (variable_declaration (identifier))
-          (variable_declaration (identifier))
-          (identifier) (operator) (integer)
-          (identifier) (operator) (identifier)
-        )
-      )
-    )
-  )
-)
+          (variable_declaration
+            (identifier))
+          (variable_declaration
+            (identifier))
+          (identifier)
+          (operator)
+          (integer)
+          (identifier)
+          (operator)
+          (identifier))))))
 
 ===================
 class function with this
@@ -600,23 +598,18 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (variable_declaration
+        (identifier))
+      (function_declaration
         (identifier)
-      )
-      (function_declaration (identifier)
         (block
-          (member_expression (identifier))
+          (member_expression
+            (identifier))
           (operator)
-          (integer)
-        )
-      )
-    )
-  )
-)
-
-
+          (integer))))))
 
 ===================
 class variables
@@ -629,14 +622,11 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (variable_declaration
-        (identifier)
-      )
-    )
-  )
-)
+        (identifier)))))
 
 ===================
 class variables with basic type
@@ -649,15 +639,13 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (variable_declaration
         (identifier)
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))))))
 
 ===================
 class variables with parameterized type
@@ -670,19 +658,16 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (variable_declaration
         (identifier)
         (type
           (identifier)
-          (type_params (type (identifier)))
-        )
-      )
-    )
-  )
-)
-
+          (type_params
+            (type
+              (identifier))))))))
 
 ===================
 class final variables with basic type
@@ -695,15 +680,13 @@ class Main {
 ---
 
 (module
-  (class_declaration (identifier)
+  (class_declaration
+    (identifier)
     (block
       (variable_declaration
         (identifier)
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))))))
 
 ===================
 type def
@@ -716,15 +699,13 @@ typedef MyType = {
 ---
 
 (module
-  (typedef_declaration (identifier)
+  (typedef_declaration
+    (identifier)
     (block
       (variable_declaration
         (identifier)
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))))))
 
 ===================
 type def 'alias'
@@ -737,9 +718,8 @@ typedef MyType = Int;
 (module
   (typedef_declaration
     (identifier)
-    (type (identifier))
-  )
-)
+    (type
+      (identifier))))
 
 ===================
 type def 'alias'
@@ -754,11 +734,9 @@ typedef MyType = Array<Int>;
     (identifier)
     (type
       (identifier)
-      (type_params (type (identifier)))
-    )
-  )
-)
-
+      (type_params
+        (type
+          (identifier))))))
 
 ===================
 type def with modifiers
@@ -768,8 +746,10 @@ private extern typedef MyType = {}
 
 ---
 
-(module (typedef_declaration (identifier) (structure_type)))
-
+(module
+  (typedef_declaration
+    (identifier)
+    (structure_type)))
 
 ===================
 var declaration with type
@@ -782,9 +762,8 @@ var x:Int;
 (module
   (variable_declaration
     (identifier)
-    (type (identifier))
-  )
-)
+    (type
+      (identifier))))
 
 ===================
 var declaration with type and access_identifiers
@@ -797,11 +776,9 @@ var x(get, set):Int;
 (module
   (variable_declaration
     (identifier)
-    (access_identifiers )
-    (type (identifier))
-  )
-)
-
+    (access_identifiers)
+    (type
+      (identifier))))
 
 ===================
 var declaration with type and parenthesis
@@ -814,9 +791,8 @@ var x:(((Int)));
 (module
   (variable_declaration
     (identifier)
-    (type (identifier))
-  )
-)
+    (type
+      (identifier))))
 
 ===================
 var declaration with type with params
@@ -831,10 +807,9 @@ var x:Array<Int>;
     (identifier)
     (type
       (identifier)
-      (type_params (type (identifier)))
-    )
-  )
-)
+      (type_params
+        (type
+          (identifier))))))
 
 ===================
 var declaration array comprehension (for)
@@ -851,12 +826,10 @@ var a = [for (i in 0...5) i];
     (array
       (comprehension_for
         (identifier)
-        (integer) (operator) (integer)
-        (identifier)
-      )
-    )
-  )
-)
+        (integer)
+        (operator)
+        (integer)
+        (identifier)))))
 
 ===================
 var declaration array comprehension (while)
@@ -871,17 +844,11 @@ var a = [while (i < 1) i];
     (identifier)
     (operator)
     (array
-      (call_expression
-        (identifier)
+      (comprehension_while
         (identifier)
         (operator)
         (integer)
-      )
-      (identifier)
-    )
-  )
-)
-
+        (identifier)))))
 
 ===================
 var declaration with function type with no inputs
@@ -896,11 +863,8 @@ var x:() -> Int;
     (identifier)
     (type
       (function_type
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))))))
 
 ===================
 var declaration with function type
@@ -915,12 +879,10 @@ var x:Int -> Int;
     (identifier)
     (type
       (function_type
-        (type (identifier))
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))
+        (type
+          (identifier))))))
 
 ===================
 var declaration with function type with named input
@@ -936,12 +898,10 @@ var x:(arg:Int) -> Int;
     (type
       (function_type
         (identifier)
-        (type (identifier))
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))
+        (type
+          (identifier))))))
 
 ===================
 var declaration with function type with named input nested function
@@ -957,14 +917,12 @@ var x:(arg:()->Int) -> Int;
     type: (type
       (function_type
         (identifier)
-        (type (function_type
-          (type built_in: (identifier))
-        ))
-        (type built_in: (identifier))
-      )
-    )
-  )
-)
+        (type
+          (function_type
+            (type
+              built_in: (identifier))))
+        (type
+          built_in: (identifier))))))
 
 ===================
 var declaration with function type with named input multiple nested function
@@ -977,24 +935,28 @@ var e:(fn:Int->Bool, Float, sub:(Bool, Bool) -> Int) -> Bool;
 (module
   (variable_declaration
     (identifier)
-    (type (function_type
+    (type
+      (function_type
         (identifier)
-        (type (function_type
-          (type (identifier))
-          (type
+        (type
+          (function_type
+            (type
+              (identifier))
+            (type
+              (identifier))))
+        (type
           (identifier))
-        ))
-      (type (identifier))
-      (identifier)
-      (type (function_type
-        (type (identifier))
-        (type (identifier))
-        (type (identifier))
-      ))
-      (type (identifier))
-    ))
-  )
-)
+        (identifier)
+        (type
+          (function_type
+            (type
+              (identifier))
+            (type
+              (identifier))
+            (type
+              (identifier))))
+        (type
+          (identifier))))))
 
 ===================
 var declaration with function type with named input multiple nested function with lots of params
@@ -1007,24 +969,28 @@ var e:((fn:(Int->Bool), Float, sub:((Bool, Bool) -> Int))->Bool);
 (module
   (variable_declaration
     (identifier)
-    (type (function_type
+    (type
+      (function_type
         (identifier)
-        (type (function_type
-          (type (identifier))
-          (type
+        (type
+          (function_type
+            (type
+              (identifier))
+            (type
+              (identifier))))
+        (type
           (identifier))
-        ))
-      (type (identifier))
-      (identifier)
-      (type (function_type
-        (type (identifier))
-        (type (identifier))
-        (type (identifier))
-      ))
-      (type (identifier))
-    ))
-  )
-)
+        (identifier)
+        (type
+          (function_type
+            (type
+              (identifier))
+            (type
+              (identifier))
+            (type
+              (identifier))))
+        (type
+          (identifier))))))
 
 ===================
 var declaration with function type with wrapped parens
@@ -1040,14 +1006,10 @@ var x:((arg:Int) -> Int);
     (type
       (function_type
         (identifier)
-        (type (identifier))
-        (type (identifier))
-      )
-    )
-  )
-)
-
-
+        (type
+          (identifier))
+        (type
+          (identifier))))))
 
 ===================
 var declaration with function type
@@ -1062,13 +1024,12 @@ var x:(Int,Int) -> Int;
     (identifier)
     (type
       (function_type
-        (type (identifier))
-        (type (identifier))
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))
+        (type
+          (identifier))
+        (type
+          (identifier))))))
 
 ===================
 var declaration with type parameter
@@ -1084,11 +1045,8 @@ var x:T<S>;
     (type
       (identifier)
       (type_params
-        (type (identifier))
-      )
-    )
-  )
-)
+        (type
+          (identifier))))))
 
 ===================
 var declaration with function type parameter
@@ -1106,11 +1064,7 @@ var x:T<S -> R>;
       (type_params
         (type
           (function_type
-            (type (identifier))
-            (type (identifier))
-          )
-        )
-      )
-    )
-  )
-)
+            (type
+              (identifier))
+            (type
+              (identifier))))))))
