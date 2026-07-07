@@ -146,20 +146,6 @@ const haxe_grammar = {
     _rhs_expression: ($) =>
       prec(1, choice($._literal, $.identifier, 'this', $.member_expression, $.call_expression)),
 
-    // Restricted to the actual unary operator sets (_prefixUnaryOperator/
-    // _postfixUnaryOperator), not the fully generic $.operator (which also
-    // includes every binary operator). The generic version let e.g. `width <`
-    // match here treating '<' as a bogus "postfix unary" operator -- almost
-    // never an issue on its own since it's semantically nonsensical, but it
-    // created a second, equally error-free reading for comparison-conditioned
-    // ternaries inside parens (`(width < height ? width : height)`, matching
-    // real code in this depot): _unaryExpression could swallow "width <" as
-    // one expression, leaving a second, separate ternary_expression for just
-    // "height ? width : height" -- silently misparsing `a < b ? c : d` as
-    // `a < (b ? c : d)` with no ERROR node to catch it. This was a
-    // pre-existing latent bug, not introduced by the < vs. type_params fix
-    // above; it surfaced now because it happened to share a state with the
-    // newly-added ternary_expression.
     _unaryExpression: ($) =>
       prec.left(
         2,
@@ -284,21 +270,6 @@ const haxe_grammar = {
         choice($._rhs_expression, $.subscript_expression, $._parenthesized_expression),
       ),
 
-    // Deliberately excludes $.ternary_expression itself (and the statement-
-    // like forms below) so a bare, unparenthesized ternary can't be used as
-    // another ternary's condition -- `a ? b : c` must be wrapped in parens
-    // to serve as a condition. This keeps the grammar's only self-recursion
-    // on this rule in the `alternative` field, which is what gives
-    // `a ? b : c ? d : e` its right-associative ("else if" chain) reading
-    // instead of an ambiguous choice between two equally-valid nestings.
-    // prec(1, ...) on the whole choice, not just one branch: `pair`'s value
-    // slot is `$.expression`, which reaches every alternative below via
-    // ternary_expression's condition field, so any of them can be mid-parse
-    // when a '?' shows up. Higher precedence than `pair`'s default (0) means
-    // the parser shifts (keeps parsing toward the ternary) instead of
-    // reducing the pair immediately, so `x : y ? c : d` reads as
-    // `x : (y ? c : d)` rather than leaving `? c : d` dangling after a
-    // prematurely-closed pair.
     _ternary_condition: ($) =>
       prec(
         2,
@@ -350,31 +321,11 @@ const haxe_grammar = {
         $.ternary_expression,
         // simple expression, or chained.
         seq($._rhs_expression, repeat(seq($.operator, $._chain_term))),
-        // Same chain, but with a leading prefix-unary term (`!x && y`,
-        // `-x + y`, etc.) -- requires repeat1 (at least one more operator/
-        // term after the head) so this alternative is never reachable for a
-        // solo unary term like `!x` alone; that continues to go exclusively
-        // through $._unaryExpression above. Without that exclusivity this
-        // would create a second, ambiguous derivation for every solo unary
-        // expression. $._unaryExpression's prefix-only reach (never chained)
-        // meant `!x && y` and similar always failed outright, even though
-        // it's extremely common real-world code (818 files in this depot
-        // use this shape).
         seq(
           alias($._prefixUnaryOperator, $.operator),
           $._rhs_expression,
           repeat1(seq($.operator, $._chain_term)),
         ),
-        // $.subscript_expression as a chain HEAD -- `x[i] = y;`,
-        // `x[i] * y`, etc. $.subscript_expression was only ever a complete,
-        // standalone `expression` on its own (e.g. `x[i];` alone), never
-        // one term of a longer chain, so any assignment or arithmetic
-        // involving an array/map element on the left failed outright.
-        // Extremely common (e.g. `mPieces[idx] = null;`,
-        // `sPeerMap[arg] = sharedName;`, `kBonusWinCredits[i] * mult`).
-        // repeat1-gated for the same reason as the leading-unary
-        // alternative above: a solo `x[i]` alone must still go through
-        // the plain $.subscript_expression choice, not this one.
         seq($.subscript_expression, repeat1(seq($.operator, $._chain_term))),
         // $._parenthesized_expression as a chain HEAD -- `(a + b) * c`,
         // `(a + b) / 2`, etc. Same gap as $.subscript_expression above: a
