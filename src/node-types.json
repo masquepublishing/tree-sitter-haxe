@@ -2934,6 +2934,10 @@
             "named": false
           },
           {
+            "type": "=",
+            "named": false
+          },
+          {
             "type": "array",
             "named": true
           },
@@ -3227,6 +3231,10 @@
           },
           {
             "type": ")",
+            "named": false
+          },
+          {
+            "type": "=",
             "named": false
           },
           {
@@ -5436,6 +5444,18 @@
       "required": false,
       "types": [
         {
+          "type": "array",
+          "named": true
+        },
+        {
+          "type": "bool",
+          "named": true
+        },
+        {
+          "type": "float",
+          "named": true
+        },
+        {
           "type": "function_type",
           "named": true
         },
@@ -5444,11 +5464,31 @@
           "named": true
         },
         {
+          "type": "integer",
+          "named": true
+        },
+        {
+          "type": "map",
+          "named": true
+        },
+        {
           "type": "member_expression",
           "named": true
         },
         {
+          "type": "null",
+          "named": true
+        },
+        {
+          "type": "object",
+          "named": true
+        },
+        {
           "type": "pair",
+          "named": true
+        },
+        {
+          "type": "string",
           "named": true
         },
         {
@@ -5783,6 +5823,10 @@
           },
           {
             "type": ")",
+            "named": false
+          },
+          {
+            "type": "=",
             "named": false
           },
           {
