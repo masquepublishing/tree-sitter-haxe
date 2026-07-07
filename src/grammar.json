@@ -724,8 +724,11 @@
                 "value": ":"
               },
               {
-                "type": "SYMBOL",
-                "name": "statement"
+                "type": "REPEAT",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "statement"
+                }
               }
             ]
           },
@@ -741,8 +744,11 @@
                 "value": ":"
               },
               {
-                "type": "SYMBOL",
-                "name": "statement"
+                "type": "REPEAT",
+                "content": {
+                  "type": "SYMBOL",
+                  "name": "statement"
+                }
               }
             ]
           }
