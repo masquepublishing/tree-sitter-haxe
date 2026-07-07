@@ -4862,6 +4862,10 @@
           "named": true
         },
         {
+          "type": "structure_type",
+          "named": true
+        },
+        {
           "type": "type_params",
           "named": true
         }
