@@ -307,7 +307,20 @@ const haxe_grammar = {
           $.subscript_expression,
           $.cast_expression,
           $._parenthesized_expression,
-          seq($._rhs_expression, repeat(seq($.operator, $._rhs_expression))),
+          // Tail terms use $._chain_term (not $._rhs_expression) so a
+          // parenthesized tail term works here too -- `(x >= 0) && (x < 10)
+          // ? a : b` previously hard-errored even though the unparenthesized
+          // `x >= 0 && x < 10 ? a : b` worked fine, since $._rhs_expression
+          // still excludes $._parenthesized_expression. Found via the same
+          // depot-wide sweep as $._chain_term's own parenthesized-term fix
+          // above (haxe/src/com/masque/mah/common/ZMap.hx:210).
+          seq($._rhs_expression, repeat(seq($.operator, $._chain_term))),
+          // A parenthesized HEAD term followed by more chain -- `(x >= 0) &&
+          // y ? a : b`. Same head/tail split as $._parenthesized_expression's
+          // two fixes in $._chain_term / `expression` above; repeat1-gated so
+          // a solo `(x >= 0)` alone still resolves via the standalone
+          // $._parenthesized_expression choice above, not this one.
+          seq($._parenthesized_expression, repeat1(seq($.operator, $._chain_term))),
         ),
       ),
 
@@ -401,6 +414,16 @@ const haxe_grammar = {
         // leading-unary -- that a bare (non-`return`) expression already
         // supports, plus a bare subscript return value (`return arr[i];`,
         // also common) which $._rhs_expression doesn't cover either.
+        //
+        // $.ternary_expression and $._parenthesized_expression are ALSO
+        // bare choices here for the same reason as $.subscript_expression:
+        // `return a ? b : c;`, `return (a ? b : c);`, and `return (a + b);`
+        // all hard-errored, since neither is reachable via $._rhs_expression
+        // (which deliberately excludes both to avoid ternary-condition
+        // ambiguity elsewhere -- see $._ternary_condition's own comment) nor
+        // via the chain alternatives above. Found via a depot-wide Haxe
+        // parse-error sweep (haxe/src/com/masque/mah/common/ZMap.hx:162,
+        // `return (ix!=-1) ? heights[ix] : -1;`).
         seq(
           'return',
           optional(
@@ -412,6 +435,8 @@ const haxe_grammar = {
                 repeat(seq($.operator, $._chain_term)),
               ),
               $.subscript_expression,
+              $.ternary_expression,
+              $._parenthesized_expression,
             ),
           ),
         ),
@@ -420,6 +445,8 @@ const haxe_grammar = {
           choice(
             seq($._rhs_expression, repeat(seq($.operator, $._chain_term))),
             $.subscript_expression,
+            $.ternary_expression,
+            $._parenthesized_expression,
             seq(
               alias($._prefixUnaryOperator, $.operator),
               $._rhs_expression,
