@@ -353,26 +353,6 @@ const haxe_grammar = {
           alias($._postfixUnaryOperator, $.operator),
           repeat1(seq($.operator, $._chain_term)),
         ),
-        // `return`/`untyped` previously only took a single bare
-        // $._rhs_expression, not a chain -- so `return a == b;` or
-        // `return a = b;` (assign-and-return, common in this depot's
-        // property setters, e.g. `return mKenoCardModel = kenoCardModel;`)
-        // had no valid derivation covering the whole span, and would
-        // hard-error. This was actually a PRE-EXISTING gap masked by a
-        // separate bug: before the _unaryExpression operator-set fix
-        // elsewhere in this fork's history, `a ==`/`a =` could silently
-        // (and incorrectly) match as _unaryExpression's postfix form
-        // (generic $.operator misread as a bogus postfix unary op),
-        // giving `return` an _rhs_expression-shaped path to latch onto by
-        // accident. Fixing that bug correctly closed off the accidental
-        // path here too, surfacing this as a hard ERROR instead of a
-        // silent misparse -- found via a depot-wide sweep combining this
-        // fork's fixes, not caught by any single fix's own testing.
-        // Broadened to accept the same chain shapes -- plain and
-        // leading-unary -- that a bare (non-`return`) expression already
-        // supports, plus a bare subscript return value (`return arr[i];`,
-        // also common) which $._rhs_expression doesn't cover either.
-        //
         // $.ternary_expression and $._parenthesized_expression are ALSO
         // bare choices here for the same reason as $.subscript_expression:
         // `return a ? b : c;`, `return (a ? b : c);`, and `return (a + b);`

@@ -839,6 +839,93 @@ var f:String->{}->Void;
   (ERROR))
 
 ===================
+type def with a single field and no trailing comma
+===================
+
+typedef JJSON = { settings:String };
+
+---
+
+(module
+  (typedef_declaration
+    (identifier)
+    (structure_type
+      (pair
+        (identifier)
+        (type
+          (identifier))))))
+
+===================
+type def with var and function members
+===================
+
+typedef Foo = {
+  var x:Int;
+  function bar():Void;
+}
+
+---
+
+(module
+  (typedef_declaration
+    (identifier)
+    (block
+      (variable_declaration
+        (identifier)
+        (type
+          (identifier)))
+      (function_declaration
+        (identifier)
+        (type
+          (identifier))))))
+
+===================
+function arg with an anonymous struct segment in a function type chain
+===================
+
+function f(cb:String->{}->Void):Void {}
+
+---
+
+(module
+  (function_declaration
+    (identifier)
+    (function_arg
+      (identifier)
+      (type
+        (function_type
+          (type
+            (identifier))
+          (type
+            (function_type
+              (type
+                (structure_type))
+              (type
+                (identifier)))))))
+    (type
+      (identifier))
+    (block)))
+
+===================
+var declaration with a struct-in-the-middle function type chain (known limitation, see $.function_type's comment in grammar.js)
+===================
+
+var f:String->{}->Void;
+
+---
+
+(module
+  (variable_declaration
+    (identifier)
+    (type
+      (function_type
+        (type
+          (identifier))
+        (type
+          (structure_type)))))
+  (ERROR))
+
+===================
 var declaration with type
 ===================
 
@@ -913,10 +1000,12 @@ var a = [for (i in 0...5) i];
     (array
       (comprehension_for
         (identifier)
-        (integer)
-        (operator)
-        (integer)
-        (identifier)))))
+        (integer) (operator) (integer)
+        (identifier)
+      )
+    )
+  )
+)
 
 ===================
 var declaration array comprehension (while)
@@ -935,7 +1024,11 @@ var a = [while (i < 1) i];
         (identifier)
         (operator)
         (integer)
-        (identifier)))))
+        (identifier)
+      )
+    )
+  )
+)
 
 ===================
 var declaration with function type with no inputs
